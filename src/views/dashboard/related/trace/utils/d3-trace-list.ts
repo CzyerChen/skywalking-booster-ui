@@ -99,7 +99,7 @@ export default class ListGraph {
       if (d >= 1000) return d / 1000 + "s";
       return d;
     });
-    this.svg.attr("height", (this.row.length + fixSpansSize + 1) * this.barHeight);
+    this.svg.attr("height", (this.row.length + this.countRefs(this.row) + fixSpansSize + 1) * this.barHeight);
     this.svg
       .append("g")
       .attr("class", "trace-xaxis")
@@ -388,11 +388,26 @@ export default class ListGraph {
     if (!this.el) {
       return;
     }
-    this.width = this.el.getBoundingClientRect().width - 20;
-    this.height = this.el.getBoundingClientRect().height - 10;
+    const svgNode: any = d3.select(".trace-list-dowanload").node();
+    if (svgNode) {
+      this.width = svgNode.clientWidth;
+      this.height = svgNode.clientHeight;
+    } else {
+      this.width = this.el.getBoundingClientRect().width - 20;
+      this.height = this.el.getBoundingClientRect().height - 10;
+    }
     this.svg.attr("width", this.width).attr("height", this.height);
     this.svg.select("g").attr("transform", () => `translate(160, 0)`);
     const transform = d3.zoomTransform(this.svg).translate(0, 0);
     d3.zoom().transform(this.svg, transform);
+  }
+  countRefs(rows: Recordable): number {
+    let count = 0;
+    rows.forEach((span: Recordable) => {
+      if (Array.isArray(span.refs) && span.refs.length > 0) {
+        count += span.refs.length;
+      }
+    });
+    return count;
   }
 }
